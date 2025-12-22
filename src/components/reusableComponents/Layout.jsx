@@ -9,7 +9,7 @@ export default function Layout({ children }) {
       <nav className="navbar navbar-light bg-light border-bottom">
         <div className="container-fluid">
           <a className="navbar-brand" href="#">
-            TaskInteli
+            TaskIQ
           </a>
           <button
             className="btn btn-outline-secondary d-md-none"

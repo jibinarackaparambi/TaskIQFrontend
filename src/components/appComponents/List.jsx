@@ -1,11 +1,14 @@
 import React from "react";
 import Layout from "../reusableComponents/Layout";
+import { Link,Navigate  } from "react-router-dom";
 
 export default class List extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       tasks: [],
+      redirect:false,
+      id: ""
     };
   }
 
@@ -28,6 +31,10 @@ export default class List extends React.Component {
     })
       .then((res) => {
         if (!res.ok) {
+          console.log(res.status, "error")
+          if (res.status == 401){
+            window.location.href = "/login";
+          }
           throw new Error("Failed to load tasks");
         }
         return res.json();
@@ -37,13 +44,24 @@ export default class List extends React.Component {
         this.setState({ tasks: data });
       })
       .catch((err) => {
+
         console.error(err);
-        alert("Error loading tasks");
       });
   };
 
+  onEdit = (e) => {
+    e.preventDefault();
+    this.setState({ redirect: true });
+    this.setState({ id: e.taget.value });
+    
+  }
+
   render() {
     const { tasks } = this.state;
+
+    if (this.state.redirect) {
+      return <Navigate to="/edit{this.state.id}" replace />;   // ✅ redirect component
+    }
 
     return (
       <div>
@@ -76,7 +94,7 @@ export default class List extends React.Component {
                       <td>{task.status}</td>
                       <td>
                         {/* action buttons later */}
-                        <button className="btn btn-sm btn-outline-secondary">
+                        <button onClick={this.onEdit} className="btn btn-sm btn-outline-secondary">
                           Edit
                         </button>
                       </td>

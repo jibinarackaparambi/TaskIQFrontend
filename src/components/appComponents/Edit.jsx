@@ -1,7 +1,8 @@
 import React from "react";
 import Layout from "../reusableComponents/Layout";
 
-export default class CreateTodoList extends React.Component {
+
+export default class Edit extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -11,9 +12,6 @@ export default class CreateTodoList extends React.Component {
             };
         this.handleSumbit = this.handleSumbit.bind(this);
         this.handleChange = this.handleChange.bind(this);
-    }
-    componentDidMount() {
-        this.load();
     }
     handleSumbit(e) {
         e.preventDefault();
@@ -26,9 +24,6 @@ export default class CreateTodoList extends React.Component {
             },
             body: JSON.stringify(this.state),   // {task_name, description, status}
         }).then((res) => {
-            if (res.status == 401){
-                window.location.href = "/login";
-            }
             if (!res.ok) {
                 throw new Error("Network response was not ok");
             }
@@ -45,23 +40,6 @@ export default class CreateTodoList extends React.Component {
     handleChange(e) {
         this.setState({[e.target.name]:e.target.value})
     }
-
-    load() {
-        const token = localStorage.getItem("access_token");
-        fetch("http://localhost:8000/api/tasks/", {
-            method: "GET",
-            headers: {
-                "Accept": "application/json",
-                // Uncomment if your endpoint requires OAuth2:
-                "Authorization": `Bearer ${token}`,
-            },
-        }).then((res) => {
-            if (res.status == 401){
-                window.location.href = "/login";
-            }
-        });
-    }
-    
     render(){
         return (
             <div>
@@ -114,7 +92,6 @@ export default class CreateTodoList extends React.Component {
                         </div>
                     </div>
                 </Layout>
-
             </div>
         );
     }

@@ -6,6 +6,7 @@ import Login from './components/authComponents/Login';
 import {BrowserRouter as Rounter, Routes,Route} from 'react-router-dom';
 import CreateTodoList from './components/appComponents/CreateTodoList';
 import List from './components/appComponents/List';
+import Edit from './components/appComponents/Edit';
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
         <Route path='/login' element={<Login />}></Route>
         <Route path='/create' element={<CreateTodoList/>}/>
         <Route path='/list' element={<List/>}/>
+        <Route path='/edit' element={<Edit/>}/>
       </Routes>
     </Rounter>
   );

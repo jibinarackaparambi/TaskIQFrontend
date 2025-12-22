@@ -18,6 +18,13 @@ export default class Sidebar extends React.Component {
     // or simplest:
     window.location.href = "/login";
   }
+
+  componentDidMount() {
+    console.log("Hai");
+    if (!localStorage.getItem('access_token')){
+      window.location.href = "/login";
+    }
+  }
   render(){
     return (
     <div
