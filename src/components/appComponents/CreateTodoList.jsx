@@ -1,121 +1,149 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Layout from "../reusableComponents/Layout";
+import { useNavigate } from "react-router-dom";
 
-export default class CreateTodoList extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            title: "",
-            description: "",
-            status: "",
-            };
-        this.handleSumbit = this.handleSumbit.bind(this);
-        this.handleChange = this.handleChange.bind(this);
-    }
-    componentDidMount() {
-        this.load();
-    }
-    handleSumbit(e) {
-        e.preventDefault();
-        console.log("formdata", this.state);
-        fetch("http://localhost:8000/api/tasks/", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${localStorage.getItem("access_token")}`
-            },
-            body: JSON.stringify(this.state),   // {task_name, description, status}
-        }).then((res) => {
-            if (res.status == 401){
-                window.location.href = "/login";
-            }
-            if (!res.ok) {
-                throw new Error("Network response was not ok");
-            }
-            return res.json();
-        }).then((data) => {
-            console.log("Created task:", data);
-            // optional: clear form
-            this.setState({ task_name: "", description: "", status: "" });
-        }).catch((err) => {
-            console.error("Error creating task:", err);
-        });
-    }
+const CreateTodoList = () => {
+  const navigate = useNavigate();
+  const [formData, setFormData] = useState({
+    title: "",
+    description: "",
+    status: ""
+  });
+  const [loading, setLoading] = useState(false);
 
-    handleChange(e) {
-        this.setState({[e.target.name]:e.target.value})
-    }
+  useEffect(() => {
+    loadTasks(); // Load tasks on mount (optional for create form)
+  }, []);
 
-    load() {
-        const token = localStorage.getItem("access_token");
-        fetch("http://localhost:8000/api/tasks/", {
-            method: "GET",
-            headers: {
-                "Accept": "application/json",
-                // Uncomment if your endpoint requires OAuth2:
-                "Authorization": `Bearer ${token}`,
-            },
-        }).then((res) => {
-            if (res.status == 401){
-                window.location.href = "/login";
-            }
-        });
-    }
+  const loadTasks = () => {
+    const token = localStorage.getItem("access_token");
+    fetch("http://localhost:8000/api/tasks/", {
+      method: "GET",
+      headers: {
+        "Accept": "application/json",
+        "Authorization": `Bearer ${token}`,
+      },
+    })
+      .then((res) => {
+        if (res.status === 401) {
+          window.location.href = "/login";
+          return;
+        }
+        if (!res.ok) throw new Error("Failed to load tasks");
+        return res.json();
+      })
+      .catch((err) => console.error(err));
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    setLoading(true);
     
-    render(){
-        return (
-            <div>
-                <Layout>
-                    <div className="container">
-                        <h2>Creat Todo Task</h2>
-                        <div className=" p-4 " style={{maxWidth: '520px'}}>
-                            <form onSubmit={this.handleSumbit}>
-                                <div className="mb-3">
-                                    <label htmlFor="exampleFormControlInput1" className="form-label">Task Name</label>
-                                    <input id='task-name'
-                                    name="title"  
-                                    type="text" 
-                                    className="form-control" 
-                                    placeholder="Task Name" 
-                                    value={this.state.title}
-                                    onChange={this.handleChange}/>
-                                </div>
-                                <div className="mb-3">
-                                    <label htmlFor="exampleFormControlTextarea1" className="form-label">Task Description</label>
-                                    <textarea name="description" id="description" className="form-control"  rows="3" value={this.state.description} onChange={this.handleChange}></textarea>
-                                </div> 
-                                {/* Status as dropdown */}
-                                <div className="mb-3">
-                                    <label
-                                        htmlFor="status"
-                                        className="form-label"
-                                    >
-                                        Status
-                                    </label>
-                                    <select
-                                        id="sWtatus"
-                                        name="status"
-                                        className="form-select"
-                                        value={this.state.status}
-                                        onChange={this.handleChange}
-                                    >
-                                        <option value="">Select status</option>
-                                        <option value="TODO">To Do</option>
-                                        <option value="INPROGRES">In Progress</option>
-                                        <option value="COMPLETED">Completed</option>
-                                        <option value="PENDING">Pending</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <button type="submit" className="btn btn-success">Save</button>
-                                </div>
+    const token = localStorage.getItem("access_token");
+    
+    fetch("http://localhost:8000/api/tasks/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+      },
+      body: JSON.stringify(formData),
+    })
+      .then((res) => {
+        if (res.status === 401) {
+          window.location.href = "/login";
+          return;
+        }
+        if (!res.ok) throw new Error("Network response was not ok");
+        return res.json();
+      })
+      .then((data) => {
+        console.log("Created task:", data);
+        // Clear form and navigate
+        setFormData({ title: "", description: "", status: "" });
+        navigate("/list"); // ✅ Correct navigation
+      })
+      .catch((err) => {
+        console.error("Error creating task:", err);
+      })
+      .finally(() => setLoading(false));
+  };
 
-                            </form>
-                        </div>
-                    </div>
-                </Layout>
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
 
-            </div>
-        );
-    }
-}
+  return (
+    <div>
+      <Layout>
+        <div className="container">
+          <h2>Create Todo Task</h2> {/* ✅ Fixed typo */}
+          <div className="p-4" style={{ maxWidth: '520px' }}>
+            <form onSubmit={handleSubmit}>
+              <div className="mb-3">
+                <label htmlFor="title" className="form-label">Task Name</label>
+                <input
+                  id="title"
+                  name="title"
+                  type="text"
+                  className="form-control"
+                  placeholder="Task Name"
+                  value={formData.title}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+              <div className="mb-3">
+                <label htmlFor="description" className="form-label">Task Description</label>
+                <textarea
+                  id="description"
+                  name="description"
+                  className="form-control"
+                  rows="3"
+                  value={formData.description}
+                  onChange={handleChange}
+                />
+              </div>
+              <div className="mb-3">
+                <label htmlFor="status" className="form-label">Status</label>
+                <select
+                  id="status" // ✅ Fixed typo "sWtatus"
+                  name="status"
+                  className="form-select"
+                  value={formData.status}
+                  onChange={handleChange}
+                  required
+                >
+                  <option value="">Select status</option>
+                  <option value="TODO">To Do</option>
+                  <option value="INPROGRES">In Progress</option>
+                  <option value="COMPLETED">Completed</option>
+                  <option value="PENDING">Pending</option>
+                </select>
+              </div>
+              <div className="d-flex gap-2">
+                <button 
+                  type="submit" 
+                  className="btn btn-success" 
+                  disabled={loading}
+                >
+                  {loading ? "Creating..." : "Create Task"}
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => navigate("/list")}
+                  disabled={loading}
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </Layout>
+    </div>
+  );
+};
+
+export default CreateTodoList;

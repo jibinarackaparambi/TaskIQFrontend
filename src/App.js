@@ -14,9 +14,10 @@ function App() {
       <Routes>
         <Route path="/" element={<Signup/>}></Route>
         <Route path='/login' element={<Login />}></Route>
-        <Route path='/create' element={<CreateTodoList/>}/>
+        {/* <Route path='/create' element={<CreateTodoList/>}/> */}
+        <Route path="/create" element={<CreateTodoList />} />
         <Route path='/list' element={<List/>}/>
-        <Route path='/edit' element={<Edit/>}/>
+        <Route path="/edit/:id" element={<Edit />} /> 
       </Routes>
     </Rounter>
   );
